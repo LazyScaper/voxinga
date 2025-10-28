@@ -1,6 +1,7 @@
 use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 use std::time::Duration;
+use bevy::window::PresentMode;
 
 #[derive(Component)]
 struct FpsText;
@@ -28,13 +29,22 @@ fn fps_update_system(
             .and_then(|fps| fps.smoothed())
             .unwrap_or(-1.0);
 
-        **text = format!("FPS {:.2}", fps)
+        **text = format!("FPS: {:.2}", fps)
     }
 }
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, FrameTimeDiagnosticsPlugin::default()))
+        .add_plugins((
+            DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    present_mode: PresentMode::AutoNoVsync,
+                    ..default()
+                }),
+                ..default()
+            }),
+            FrameTimeDiagnosticsPlugin::default(),
+        ))
         .insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(100)))
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, fps_update_system)
