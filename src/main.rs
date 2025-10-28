@@ -1,7 +1,7 @@
 use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
-use std::time::Duration;
 use bevy::window::PresentMode;
+use std::time::Duration;
 
 #[derive(Component)]
 struct FpsText;
@@ -29,7 +29,12 @@ fn fps_update_system(
             .and_then(|fps| fps.smoothed())
             .unwrap_or(-1.0);
 
-        **text = format!("FPS: {:.2}", fps)
+        let frame_time = diagnostics
+            .get(&FrameTimeDiagnosticsPlugin::FRAME_TIME)
+            .and_then(|time| time.smoothed())
+            .unwrap_or(-1.0);
+
+        **text = format!("FPS: {:.2} ({:.2}ms)", fps, frame_time);
     }
 }
 
