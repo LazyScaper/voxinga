@@ -964,6 +964,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ef8e4b7e61dfe7719bb03c884dc270cd46a82efb40f93e9933b990c5c190c59"
 
 [[package]]
+name = "bevy_panorbit_camera"
+version = "0.31.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a57ca48d899c78f55e3656175bc972431125a632714e6d268da5add67e71fde"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "bevy_pbr"
 version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4516,6 +4525,7 @@ name = "voxinga"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_panorbit_camera",
 ]
 
 [[package]]
