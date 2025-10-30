@@ -1,8 +1,6 @@
 use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::window::PresentMode;
-use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
-use std::f32::consts::TAU;
 use std::time::Duration;
 
 #[derive(Component)]
@@ -41,20 +39,8 @@ fn setup(
 
     // camera
     commands.spawn((
-        Transform::from_translation(Vec3::new(0.0, 1.5, 5.0)),
-        PanOrbitCamera {
-            yaw_upper_limit: Some(TAU / 4.0),
-            yaw_lower_limit: Some(-TAU / 4.0),
-            pitch_upper_limit: Some(TAU / 3.0),
-            pitch_lower_limit: Some(-TAU / 3.0),
-            zoom_upper_limit: Some(5.0),
-            zoom_lower_limit: 1.0,
-            // Adjust sensitivity of controls
-            orbit_sensitivity: 0.15,
-            pan_sensitivity: 0.05,
-            zoom_sensitivity: 0.5,
-            ..default()
-        },
+        Transform::from_translation(Vec3::new(15.0, 10.0, 15.0)).looking_at(Vec3::ZERO, Vec3::Y),
+        Camera3d::default(),
     ));
 }
 
@@ -98,7 +84,6 @@ fn main() {
                 }),
                 ..default()
             }),
-            PanOrbitCameraPlugin,
             FrameTimeDiagnosticsPlugin::default(),
         ))
         .insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(100)))
