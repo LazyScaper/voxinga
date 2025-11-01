@@ -39,12 +39,6 @@ fn setup(
         },
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
-
-    // camera
-    commands.spawn((
-        Transform::from_translation(Vec3::new(15.0, 10.0, 15.0)).looking_at(Vec3::ZERO, Vec3::Y),
-        Camera3d::default(),
-    ));
 }
 
 fn setup_grid(
@@ -125,6 +119,7 @@ fn setup_player(
         // Tnua can fix the rotation, but the character will still get rotated before it can do so.
         // By locking the rotation we can prevent this.
         LockedAxes::ROTATION_LOCKED,
+        Camera3d::default(),
     ));
 }
 
