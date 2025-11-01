@@ -1,7 +1,6 @@
 use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::window::PresentMode;
-use bevy_rapier3d::prelude::*;
 use std::time::Duration;
 
 #[derive(Component)]
@@ -24,20 +23,10 @@ fn setup(
                 } else {
                     Color::WHITE
                 })),
-                Collider::cuboid(100.0, 0.1, 100.0),
                 Transform::from_xyz(i as f32, 0.0, j as f32),
             ));
         }
     }
-
-    // create a ball
-    commands
-        .spawn(RigidBody::Dynamic)
-        .insert(Mesh3d(meshes.add(Sphere::new(1.0))))
-        .insert(MeshMaterial3d(materials.add(Color::WHITE)))
-        .insert(Collider::ball(1.0))
-        .insert(Restitution::coefficient(0.9))
-        .insert(Transform::from_xyz(5.0, 9.0, 5.0));
 
     // light
     commands.spawn((
@@ -97,8 +86,6 @@ fn main() {
             }),
             FrameTimeDiagnosticsPlugin::default(),
         ))
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugins(RapierDebugRenderPlugin::default())
         .insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(100)))
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, fps_update_system)
