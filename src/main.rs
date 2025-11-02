@@ -4,7 +4,7 @@ use bevy::color::palettes::css;
 use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
 use bevy::input::mouse::MouseMotion;
 use bevy::prelude::*;
-use bevy::window::PresentMode;
+use bevy::window::{CursorOptions, PresentMode};
 use bevy_tnua::prelude::*;
 use bevy_tnua_avian3d::prelude::*;
 use bevy_tnua_avian3d::TnuaAvian3dPlugin;
@@ -46,21 +46,22 @@ fn setup_player(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn((
-        Mesh3d(meshes.add(Capsule3d {
-            radius: 0.5,
-            half_length: 0.5,
-        })),
-        MeshMaterial3d(materials.add(Color::from(css::DARK_CYAN))),
-        Transform::from_xyz(3.0, 2.0, 3.0),
-        RigidBody::Dynamic,
-        Collider::capsule(0.5, 1.0),
-        TnuaController::default(),
-        TnuaAvian3dSensorShape(Collider::cylinder(0.49, 0.0)),
-        LockedAxes::ROTATION_LOCKED,
-        Player,
-        PlayerYaw::default(),
-    ))
+    commands
+        .spawn((
+            Mesh3d(meshes.add(Capsule3d {
+                radius: 0.5,
+                half_length: 0.5,
+            })),
+            MeshMaterial3d(materials.add(Color::from(css::DARK_CYAN))),
+            Transform::from_xyz(3.0, 2.0, 3.0),
+            RigidBody::Dynamic,
+            Collider::capsule(0.5, 1.0),
+            TnuaController::default(),
+            TnuaAvian3dSensorShape(Collider::cylinder(0.49, 0.0)),
+            LockedAxes::ROTATION_LOCKED,
+            Player,
+            PlayerYaw::default(),
+        ))
         .with_children(|parent| {
             // Spawn camera as a child of the player
             parent.spawn((
@@ -71,10 +72,30 @@ fn setup_player(
         });
 }
 
+fn toggle_cursor_lock(
+    mut cursor_options: Single<&mut CursorOptions>,
+    keyboard: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard.just_pressed(KeyCode::Escape) {
+        match cursor_options.grab_mode {
+            bevy::window::CursorGrabMode::None => {
+                cursor_options.grab_mode = bevy::window::CursorGrabMode::Locked;
+                cursor_options.visible = false;
+            }
+            _ => {
+                cursor_options.grab_mode = bevy::window::CursorGrabMode::None;
+                cursor_options.visible = true;
+            }
+        }
+    }
+}
 fn camera_look(
-    mut mouse_motion: EventReader<MouseMotion>,
+    mut mouse_motion: MessageReader<MouseMotion>,
     mut player_query: Query<(&mut Transform, &mut PlayerYaw), With<Player>>,
-    mut camera_query: Query<(&mut Transform, &mut PlayerCamera), (With<PlayerCamera>, Without<Player>)>,
+    mut camera_query: Query<
+        (&mut Transform, &mut PlayerCamera),
+        (With<PlayerCamera>, Without<Player>),
+    >,
 ) {
     let Ok((mut player_transform, mut player_yaw)) = player_query.single_mut() else {
         return;
@@ -252,6 +273,6 @@ fn main() {
                 apply_controls.in_set(TnuaUserControlsSystems),
             ),
         )
-        .add_systems(Update, camera_look)
+        .add_systems(Update, (camera_look, toggle_cursor_lock))
         .run();
 }
