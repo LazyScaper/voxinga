@@ -41,37 +41,6 @@ impl Default for PlayerYaw {
     }
 }
 
-fn setup_player(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    commands
-        .spawn((
-            Mesh3d(meshes.add(Capsule3d {
-                radius: 0.5,
-                half_length: 0.5,
-            })),
-            MeshMaterial3d(materials.add(Color::from(css::DARK_CYAN))),
-            Transform::from_xyz(3.0, 2.0, 3.0),
-            RigidBody::Dynamic,
-            Collider::capsule(0.5, 1.0),
-            TnuaController::default(),
-            TnuaAvian3dSensorShape(Collider::cylinder(0.49, 0.0)),
-            LockedAxes::ROTATION_LOCKED,
-            Player,
-            PlayerYaw::default(),
-        ))
-        .with_children(|parent| {
-            // Spawn camera as a child of the player
-            parent.spawn((
-                Camera3d::default(),
-                Transform::from_xyz(0.0, 0.5, 0.0),
-                PlayerCamera::default(),
-            ));
-        });
-}
-
 fn toggle_cursor_lock(
     mut cursor_options: Single<&mut CursorOptions>,
     keyboard: Res<ButtonInput<KeyCode>>,
@@ -89,6 +58,7 @@ fn toggle_cursor_lock(
         }
     }
 }
+
 fn camera_look(
     mut mouse_motion: MessageReader<MouseMotion>,
     mut player_query: Query<(&mut Transform, &mut PlayerYaw), With<Player>>,
@@ -119,7 +89,6 @@ fn camera_look(
     // Apply pitch to camera (rotation around X axis)
     camera_transform.rotation = Quat::from_rotation_x(camera.pitch);
 }
-
 fn apply_controls(
     keyboard: Res<ButtonInput<KeyCode>>,
     player_query: Query<&Transform, With<Player>>,
@@ -171,8 +140,8 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     setup_gui(&mut commands);
-
     setup_grid(&mut commands, &mut meshes, &mut materials);
+    setup_player(&mut commands, &mut meshes, &mut materials);
 
     // Dynamic physics object with a collision shape and initial angular velocity
     commands.spawn((
@@ -196,8 +165,8 @@ fn setup(
 
 fn setup_grid(
     commands: &mut Commands,
-    mut meshes: &mut ResMut<Assets<Mesh>>,
-    mut materials: &mut ResMut<Assets<StandardMaterial>>,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
 ) {
     let grid_size = 10;
     for i in 0..grid_size {
@@ -228,6 +197,37 @@ fn setup_gui(commands: &mut Commands) {
         },
         FpsText,
     ));
+}
+
+fn setup_player(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+) {
+    commands
+        .spawn((
+            Mesh3d(meshes.add(Capsule3d {
+                radius: 0.5,
+                half_length: 0.5,
+            })),
+            MeshMaterial3d(materials.add(Color::from(css::DARK_CYAN))),
+            Transform::from_xyz(3.0, 2.0, 3.0),
+            RigidBody::Dynamic,
+            Collider::capsule(0.5, 1.0),
+            TnuaController::default(),
+            TnuaAvian3dSensorShape(Collider::cylinder(0.49, 0.0)),
+            LockedAxes::ROTATION_LOCKED,
+            Player,
+            PlayerYaw::default(),
+        ))
+        .with_children(|parent| {
+            // Spawn camera as a child of the player
+            parent.spawn((
+                Camera3d::default(),
+                Transform::from_xyz(0.0, 0.5, 0.0),
+                PlayerCamera::default(),
+            ));
+        });
 }
 
 fn fps_update_system(
@@ -265,7 +265,7 @@ fn main() {
             TnuaControllerPlugin::new(FixedUpdate),
             TnuaAvian3dPlugin::new(FixedUpdate),
         ))
-        .add_systems(Startup, (setup, setup_player))
+        .add_systems(Startup, setup)
         .add_systems(
             FixedUpdate,
             (
